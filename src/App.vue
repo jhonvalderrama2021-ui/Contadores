@@ -1,5 +1,6 @@
 <script setup lang="ts">
 // App shell: header + footer. Views are provided by router via <router-view />
+const base = import.meta.env.BASE_URL
 </script>
 
 <template>
@@ -7,7 +8,7 @@
   <header class="site-header">
       <div class="container header-inner">
         <div class="brand-block">
-          <img src="/sv-logo.png" alt="Logotipo SV Contadores Públicos" class="brand-logo" />
+          <img :src="base + 'sv-logo.png'" alt="Logotipo SV Contadores Públicos" class="brand-logo" />
           <div class="brand-copy">
             <p class="brand-title">Contadores Públicos</p>
             <p class="brand-subtitle">Especialistas en Revisoría Fiscal y Auditoría Integral</p>
