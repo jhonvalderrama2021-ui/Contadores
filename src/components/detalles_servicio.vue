@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { services } from '../data/services'
 
@@ -47,6 +47,57 @@ const activeSlug = computed(() => activeService.value?.slug)
 
 function select(slugS: string) {
   router.push({ name: 'detalle', params: { slug: slugS } })
+}
+
+// Contact helpers for this details page
+function openWhatsAppForService(phone: string, serviceTitle?: string) {
+  const text = serviceTitle ? encodeURIComponent(`Hola, estoy interesado en el servicio: ${serviceTitle}. ¿Me pueden dar más información?`) : ''
+  const url = text ? `https://wa.me/${phone}?text=${text}` : `https://wa.me/${phone}`
+  window.open(url, '_blank')
+}
+
+
+
+// Modal state for collecting client info before opening mailto
+const showEmailModal = ref(false)
+const modalName = ref('')
+const modalEmail = ref('')
+const modalPhone = ref('')
+const modalServiceTitle = ref<string | undefined>(undefined)
+
+function openEmailModal(serviceTitle?: string) {
+  modalServiceTitle.value = serviceTitle
+  modalName.value = ''
+  modalEmail.value = ''
+  modalPhone.value = ''
+  showEmailModal.value = true
+}
+
+function openMailClientFromModal() {
+  const recipients = 'contabildiad.valderrana@gmail.com,stefaniaconta10@gmail.com'
+  const subject = modalServiceTitle.value ? `Consulta sobre: ${modalServiceTitle.value}` : 'Consulta de servicio'
+
+  const bodyLines = [
+    'Hola,',
+    '',
+    modalServiceTitle.value ? `Quisiera recibir información sobre el servicio: ${modalServiceTitle.value}` : 'Quisiera recibir información sobre sus servicios.',
+    '',
+    `Nombre: ${modalName.value || ''}`,
+    `Correo electrónico: ${modalEmail.value || ''}`,
+    `Teléfono: ${modalPhone.value || ''}`,
+    '',
+    'Gracias.'
+  ]
+
+  const bodyText = bodyLines.join('\r\n')
+  const mailto = `mailto:${recipients}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(bodyText)}`
+  // close modal then open mail client
+  showEmailModal.value = false
+  window.location.href = mailto
+}
+
+function closeEmailModal() {
+  showEmailModal.value = false
 }
 </script>
 
@@ -99,6 +150,36 @@ function select(slugS: string) {
                   <span class="check">✔</span> {{ benefit }}
                 </li>
               </ul>
+            </div>
+            <!-- Contact actions for this specific service -->
+            <div class="service-contact-actions" style="margin-top:2rem;display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+              <button type="button" class="primary-btn" @click="openEmailModal(activeService.title)">Enviar por correo</button>
+              <button type="button" class="primary-btn" @click="openWhatsAppForService('573142376316', activeService.title)">WhatsApp - Carlos</button>
+              <button type="button" class="primary-btn" @click="openWhatsAppForService('573173444410', activeService.title)">WhatsApp - Stefanía</button>
+            </div>
+
+            <!-- Email modal (simple) -->
+            <div v-if="showEmailModal" class="email-modal" style="position:fixed;left:0;top:0;right:0;bottom:0;display:grid;place-items:center;background:rgba(0,0,0,0.55);z-index:1000;padding:1.5rem;">
+              <div style="width:100%;max-width:540px;background:rgba(8,12,20,0.95);padding:1.25rem;border-radius:12px;border:1px solid rgba(245,216,168,0.12);">
+                <div style="display:flex;justify-content:flex-start;align-items:center;margin-bottom:0.75rem;">
+                  <h4 style="margin:0;color:#f5d8a8">Enviar correo - Información de contacto</h4>
+                </div>
+                <div style="display:grid;gap:0.75rem;">
+                  <label style="display:block;color:rgba(241,226,199,0.9)">Nombre completo
+                    <input v-model="modalName" type="text" style="width:100%;margin-top:0.35rem;padding:0.6rem;border-radius:8px;border:1px solid rgba(245,216,168,0.12);background:rgba(10,14,22,0.7);color:#fff" />
+                  </label>
+                  <label style="display:block;color:rgba(241,226,199,0.9)">Correo electrónico
+                    <input v-model="modalEmail" type="email" style="width:100%;margin-top:0.35rem;padding:0.6rem;border-radius:8px;border:1px solid rgba(245,216,168,0.12);background:rgba(10,14,22,0.7);color:#fff" />
+                  </label>
+                  <label style="display:block;color:rgba(241,226,199,0.9)">Teléfono
+                    <input v-model="modalPhone" type="tel" style="width:100%;margin-top:0.35rem;padding:0.6rem;border-radius:8px;border:1px solid rgba(245,216,168,0.12);background:rgba(10,14,22,0.7);color:#fff" />
+                  </label>
+                </div>
+                <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:0.85rem;">
+                  <button type="button" class="primary-btn" @click="closeEmailModal">Cancelar</button>
+                  <button type="button" class="primary-btn" @click="openMailClientFromModal">Enviar</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

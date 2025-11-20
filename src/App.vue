@@ -17,7 +17,7 @@ const base = import.meta.env.BASE_URL
         <nav class="nav-links" aria-label="Principal">
           <router-link to="/">Inicio</router-link>
           <router-link to="/servicios">Servicios</router-link>
-          <a href="#contacto">Contacto</a>
+          <router-link :to="{ path: '/', hash: '#contacto' }">Contacto</router-link>
         </nav>
       </div>
     </header>
